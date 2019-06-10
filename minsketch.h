@@ -1,6 +1,6 @@
 #ifndef MINSKETCH_H
 #define MINSKETCH_H
-
+#include <stdbool.h>
 typedef struct minsketch minsketch_t;
 
 /*Crea un nuevo TDA minsketch, devuelve un puntero al struct,
@@ -14,7 +14,7 @@ minsketch_t* min_crear();
  * Pre: minsketch fue creado.
  * Post: guarda el elemento en el TDA. 
  */
-bool min_guardar(minsketch_t* min, char* clave);
+void min_guardar(minsketch_t* min, char* clave);
 
 /* Devuelve la cantidad (que se estima) de veces que se guarda la clave solicitada.
  * Si devuelve 0, quiere decir que nunca fue guardada.
