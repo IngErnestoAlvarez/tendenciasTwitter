@@ -6,45 +6,73 @@
 #define TAM_VEC 10000
 
 struct minsketch{
-	int* v1;
-	int* v2;
-	int* v3;
+	size_t* vector1;
+	size_t* vector2;
+	size_t* vector3;
 };
 
 
-/********************************************/
-/*******FUNCIONES DE HASH********************/
-/********************************************/
+/* *****************************************************************
+ *                    FUNCIONES DE HASHING
+ * *****************************************************************/
 
-int funcion1(const char* clave);
+size_t funcion1(const char* cp)
+{
+    size_t hash = 0x811c9dc5;
+    while (*cp) {
+        hash ^= (unsigned char) *cp++;
+        hash *= 0x01000193;
+    }
+    return hash;
+}
+//Del tp del hash, sigo sin saber de donde es.
+static unsigned long funcion2(unsigned char *str)
+ 	{
+        unsigned long hash = 0;
+        int c;
 
-int funcion2(const char* clave);
+        while (c = *str++)
+            hash = c + (hash << 6) + (hash << 16) - hash;
 
-int funcion3(const char* clave);
+        return hash;
+    }
 
+    //Algoritmo creado para la base de datos sdbm, 
+    //fuente: http://profesores.elo.utfsm.cl/~agv/elo320/miscellaneous/hashFunction/hashFunction.html
+unsigned long funcion3(unsigned char *str)
+    {
+        unsigned long hash = 5381;
+        int c;
 
-/********************************************/
-/*******PRIMITIVAS********************/
-/********************************************/
+        while (c = *str++)
+            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+        return hash;
+  	}
+//djb2 la cual es una variante del algoritmo popularizado por Dan J. Bernstein.
+//Fuente y mas informacion: http://profesores.elo.utfsm.cl/~agv/elo320/miscellaneous/hashFunction/hashFunction.html
+/* *****************************************************************
+ *                         PRIMITIVAS
+ * *****************************************************************/
 
 minsketch_t* min_crear(){
 	minsketch_t* nuevo = malloc(sizeof(minsketch_t));
 	if(!nuevo) return NULL;
-	nuevo->v1 = malloc(sizeof(int) * (TAM_VEC));
-	if(!nuevo->v1){
+	nuevo->vector1 = malloc(sizeof(size_t) * (TAM_VEC));
+	if(!nuevo->vector1){
 		free(nuevo);
 		return NULL;
 	}
-	nuevo->v2 = malloc(sizeof(int) * (TAM_VEC));
-	if(!nuevo->v2){
-		free(nuevo->v1);
+	nuevo->vector2 = malloc(sizeof(size_t) * (TAM_VEC));
+	if(!nuevo->vector2){
+		free(nuevo->vector1);
 		free(nuevo);
 		return NULL;
 	}
-	nuevo->v3 = malloc(sizeof(int) * (TAM_VEC));
-	if(!nuevo->v3){
-		free(nuevo->v1);
-		free(nuevo->v2);
+	nuevo->vector3 = malloc(sizeof(size_t) * (TAM_VEC));
+	if(!nuevo->vector3){
+		free(nuevo->vector1);
+		free(nuevo->vector2);
 		free(nuevo);
 		return NULL;
 	}
@@ -52,27 +80,27 @@ minsketch_t* min_crear(){
 }
 
 void min_guardar(minsketch_t* min,const char* clave){
-	min->v1[funcion1(clave)]++;
-	min->v2[funcion2(clave)]++;
-	min->v3[funcion3(clave)]++;
+	min->vector1[funcion1(clave)]++;
+	min->vector2[funcion2(clave)]++;
+	min->vector3[funcion3(clave)]++;
 }
 
-int min_obtener(minsketch_t* min, const char* clave){
-	int minimo = min->v1[funcion1(clave)];
+size_t min_obtener(minsketch_t* min, const char* clave){
+	size_t minimo = min->vector1[funcion1(clave)];
 
-	if(minimo > min->v2[funcion2(clave)]){
-		minimo = min->v2[funcion2(clave)];
+	if(minimo > min->vector2[funcion2(clave)]){
+		minimo = min->vector2[funcion2(clave)];
 	}
 
-	if(minimo > min->v3[funcion3(clave)]){
-		minimo = min->v3[funcion3(clave)];
+	if(minimo > min->vector3[funcion3(clave)]){
+		minimo = min->vector3[funcion3(clave)];
 	}
 	return minimo;
 }
 
 void min_destruir(minsketch_t* min){
-	free(min->v1);
-	free(min->v2);
-	free(min->v3);
+	free(min->vector1);
+	free(min->vector2);
+	free(min->vector3);
 	free(min);
 }

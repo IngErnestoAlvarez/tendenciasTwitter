@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include "minsketch.h"
 
-/*************************************************/
-/***********FUNCIONES AUXILIARES*********************/
-/*************************************************/
+/* *****************************************************************
+ *                    FUNCIONES AUXILIARES
+ * *****************************************************************/
 bool validar_parametros(int argc,char* argv[]){
 	if(argc != 3){
 		fprintf(stderr, "Error: La cantidad de parametros no es valida.");
@@ -21,9 +21,9 @@ bool validar_parametros(int argc,char* argv[]){
 	}
 	return true;
 }
-/*************************************************/
-/***********FUNCION PRINCIPAL*********************/
-/*************************************************/
+/* *****************************************************************
+ *                      FUNCION PRINCIPAL
+ * *****************************************************************/
 int main(int argc, char *argv[]){
 	if(!validar_parametros(argc, argv)) return -1;	
 

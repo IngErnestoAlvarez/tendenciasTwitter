@@ -20,7 +20,7 @@ void min_guardar(minsketch_t* min, char* clave);
  * Si devuelve 0, quiere decir que nunca fue guardada.
  * Pre: El TDA fue creado.
  */
-int min_obtener(minsketch_t* min, const char* clave);
+size_t min_obtener(minsketch_t* min, const char* clave);
 
 /* Destruye el minsketch pasado por parametro.
  * Pre: El TDA fue creado.
