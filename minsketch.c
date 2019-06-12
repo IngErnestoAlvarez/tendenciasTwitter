@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "minsketch.h"
 
@@ -31,7 +32,7 @@ static unsigned long funcion2(unsigned char *str)
         unsigned long hash = 0;
         int c;
 
-        while (c = *str++)
+        while ((c = *str++))
             hash = c + (hash << 6) + (hash << 16) - hash;
 
         return hash;
@@ -44,7 +45,7 @@ unsigned long funcion3(unsigned char *str)
         unsigned long hash = 5381;
         int c;
 
-        while (c = *str++)
+        while ((c = *str++))
             hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
         return hash;

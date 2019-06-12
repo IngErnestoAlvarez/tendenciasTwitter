@@ -14,7 +14,7 @@ minsketch_t* min_crear();
  * Pre: minsketch fue creado.
  * Post: guarda el elemento en el TDA. 
  */
-void min_guardar(minsketch_t* min, char* clave);
+void min_guardar(minsketch_t* min,const char* clave);
 
 /* Devuelve la cantidad (que se estima) de veces que se guarda la clave solicitada.
  * Si devuelve 0, quiere decir que nunca fue guardada.
