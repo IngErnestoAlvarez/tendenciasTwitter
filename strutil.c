@@ -6,7 +6,7 @@
 
 char* substr(const char* string, size_t k){
     char* nueva;
-    if(k<0) return NULL;
+    //if(k<0) return NULL;
     //Cuando K es menor a la cantidad de caracteres de string
     if(strlen(string) >= k){
         nueva = malloc(sizeof(char)*(k+1));
