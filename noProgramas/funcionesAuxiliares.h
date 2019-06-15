@@ -19,6 +19,7 @@ lista_t* leer_tweets(FILE* archivo,size_t cantidad);
 /* Lee de un archivo hasta que se encuentra con 'caracter' o el fin de archivo.
  * Pre: El archivo debe estar abierto.
  * Post: Devuelve un string (DINAMICO) que termina en '\0' (No resetea el cursor del archivo). 
+ *		 Si el archivo se termino, devuelve NULL.
  */
 char* leer_hasta_char(FILE* archivo,char caracter);
 

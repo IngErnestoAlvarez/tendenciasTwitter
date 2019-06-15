@@ -27,7 +27,22 @@ bool validar_parametros(int argc,char* argv[]){
 	return true;
 }
 
+lista_t* obtener_historico(minsketch_t* min,lista_t* lista_tweets,size_t posibles_h){
+	heap_t* historico=heap_crear(); //minimos
+	lista_iter_t* iter=lista_iter_crear(lista_tweets);
+	for(size_t i=0; i < posibles_h;i++) {
+		heap_encolar(historico,lista_iter_ver_actual(iter),min_obtener(min,lista_iter_ver_actual));
+		lista_iter_avanzar(iter);
+	}
+	while(!iter_esta_al_final(iter)){
+		if()
+		lista_iter_avanzar(iter)
+	}
 
+
+
+	return(historico);
+}
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
  * *****************************************************************/
