@@ -27,45 +27,41 @@ bool validar_parametros(int argc,char* argv[]){
 	return true;
 }
 
-lista_t* obtener_historico(minsketch_t* min,lista_t* lista_tweets,size_t posibles_h){
-	heap_t* historico=heap_crear(); //minimos
-	lista_iter_t* iter=lista_iter_crear(lista_tweets);
-	for(size_t i=0; i < posibles_h;i++) {
-		heap_encolar(historico,lista_iter_ver_actual(iter),min_obtener(min,lista_iter_ver_actual));
+minsketch_t* cargar_sketch(lista_t* lista_tweets){
+	lista_iter_t* iter = lista_iter_crear(lista_tweets);
+	minsketch_t* sketch=min_crear();
+	while(!lista_iter_al_final(iter)){
+		char* tweet = lista_iter_ver_actual(iter);
+		char** tweet_s = split(tweet, ',');
+		int i = 1; //saltea el usuario
+		while(tweet_s[i] != NULL){
+			min_guardar(sketch, tweet_s[i]);
+			i++;
+		}
+		free_strv(tweet_s);
 		lista_iter_avanzar(iter);
 	}
-	while(!iter_esta_al_final(iter)){
-		if()
-		lista_iter_avanzar(iter)
-	}
-
-
-
-	return(historico);
+	lista_iter_destruir(iter);
+	return(sketch);
 }
+
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
  * *****************************************************************/
 int main(int argc, char *argv[]){
 	if(!validar_parametros(argc, argv)) return -1;	
 	
-	//se tiene que repetir hasta que no haya mas tweets
-	//Otra funcion aux?
 	lista_t* lista_de_tweets = leer_tweets(stdin, atoi(argv[1])); 
-	lista_iter_t* iter = lista_iter_crear(lista_de_tweets);
-	minsketch_t* sketch=min_crear();
-	size_t historico=0;
-	while( (historico<atoi(argv[2])) && (!lista_iter_al_final(iter)) ){
-		char* tweet = lista_iter_ver_actual(iter);
-		char** tweet_s = split(tweet, ',');
-		int i=1; //saltea el usuario
-		while(tweet_s[i] != NULL){
-			min_guardar(sketch,tweet_s[i]);
-			i++;
-		}
-		free_strv(tweet_s);
-		lista_iter_avanzar(iter);
-		historico++;
+	while(!lista_esta_vacia(lista_de_tweets)){
+		
+		minsketch_t* sketch = cargar_sketch(lista_de_tweets);
+		heap_t* heap = cargar_heap(lista_de_tweets, sketch, atoi(argv[2]));
+		imprimir_tt(heap,min);
+
+		lista_destruir(lista_de_tweets,free);
+		heap_destruir(heap);
+		min_destruir(sketch);
+		lista_de_tweets=leer_tweets(stdin,atoi(argv[1]));
 	}
 
 	lista_destruir(lista_de_tweets,free);
