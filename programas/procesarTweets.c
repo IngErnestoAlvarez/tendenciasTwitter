@@ -2,14 +2,37 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "minsketch.h"
-#include "strutil.h"
-#include "lista.h"
-#include "funcionesAuxiliares.h"
+#include "../noProgramas/minsketch.h"
+#include "../noProgramas/strutil.h"
+#include "../noProgramas/lista.h"
+#include "../noProgramas/funcionesAuxiliares.h"
+#include "../noProgramas/heap.h"
+#include "../noProgramas/hash.h"
 
+typedef struct{
+	char* clave;
+	size_t cant;
+}tt_t;
 /* *****************************************************************
  *                    FUNCIONES AUXILIARES
  * *****************************************************************/
+
+tt_t* tt_crear(const char* clave, size_t cant){
+	tt_t* tt = malloc(sizeof(tt_t));
+	//COPIAR CLAVE
+	tt->clave = clave;
+	tt->cant = cant;
+	return tt;
+}
+
+void tt_destruir_(tt_t* tt){
+	free(tt->clave);
+	free(tt);
+}
+
+void tt_destruir(void* tt){
+	tt_destruir_((tt_t*)tt);
+}
 
 bool validar_parametros(int argc,char* argv[]){
 	if(argc != 3){
@@ -45,6 +68,37 @@ minsketch_t* cargar_sketch(lista_t* lista_tweets){
 	return(sketch);
 }
 
+heap_t* cargar_heap(lista_t* lista, minsketch_t* min, int k){
+	hash_t* hash = hash_crear(NULL);
+	heap_t* heap = heap_crear(cmp);
+	char* linea;
+	char** tweet = NULL;
+	size_t i = 1;
+	tt_t* tt = NULL;
+	while(!lista_esta_vacia(lista)){
+		linea = lista_borrar_primero(lista);
+		tweet = split(linea, ',');
+		free(linea);
+		while(tweet[i]){
+			if(!hash_pertenece(hash, tweet[i])){
+				hash_guardar(hash, tweet[i], NULL);
+				tt = tt_crear(tweet[i], min_obtener(min, tweet[i]));
+				if(heap_cantidad(heap) < k){
+					heap_encolar(heap, tt);
+				}
+				else if(cmp(heap_ver_max(heap), tt) > 0){
+					tt_destruir(heap_desencolar(heap));
+					heap_encolar(heap, tt);
+				}
+			}
+			i++;
+		}
+		i = 1;
+		free_strv(tweet);
+	}
+	hash_destruir(hash);
+	return heap;
+}
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
  * *****************************************************************/
@@ -56,10 +110,10 @@ int main(int argc, char *argv[]){
 		
 		minsketch_t* sketch = cargar_sketch(lista_de_tweets);
 		heap_t* heap = cargar_heap(lista_de_tweets, sketch, atoi(argv[2]));
-		imprimir_tt(heap,min);
+		imprimir_tt(heap,sketch);
 
 		lista_destruir(lista_de_tweets,free);
-		heap_destruir(heap);
+		heap_destruir(heap, tt_destruir);
 		min_destruir(sketch);
 		lista_de_tweets=leer_tweets(stdin,atoi(argv[1]));
 	}
