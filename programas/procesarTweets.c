@@ -8,6 +8,7 @@
 #include "../noProgramas/funcionesAuxiliares.h"
 #include "../noProgramas/heap.h"
 #include "../noProgramas/hash.h"
+#include "../noProgramas/pila.h"
 
 typedef struct{
 	char* clave;
@@ -99,6 +100,15 @@ heap_t* cargar_heap(lista_t* lista, minsketch_t* min, int k){
 	hash_destruir(hash);
 	return heap;
 }
+
+void imprimir_tt(heap_t heap){
+	pila_t* pila = pila_crear();
+	while(!heap_esta_vacio(heap)) pila_apilar(pila, heap_desencolar(heap));
+	while(!pila_esta_vacia(pila)){
+		tt_t* tt = pila_desapilar(pila);
+		fprintf(stdout, "%d %s\n", tt->cant, tt->clave);
+	}
+}
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
  * *****************************************************************/
@@ -106,11 +116,14 @@ int main(int argc, char *argv[]){
 	if(!validar_parametros(argc, argv)) return -1;	
 	
 	lista_t* lista_de_tweets = leer_tweets(stdin, atoi(argv[1])); 
+	int indice = 1;
 	while(!lista_esta_vacia(lista_de_tweets)){
 		
 		minsketch_t* sketch = cargar_sketch(lista_de_tweets);
 		heap_t* heap = cargar_heap(lista_de_tweets, sketch, atoi(argv[2]));
-		imprimir_tt(heap,sketch);
+		fprintf(stdout, "--- %d\n", indice);
+		indice++;
+		imprimir_tt(heap);
 
 		lista_destruir(lista_de_tweets,free);
 		heap_destruir(heap, tt_destruir);
