@@ -27,7 +27,7 @@ size_t funcion1(const char* cp)
     return hash;
 }
 //Del tp del hash, sigo sin saber de donde es.
-static unsigned long funcion2(unsigned char *str)
+static unsigned long funcion2(const unsigned char *str)
  	{
         unsigned long hash = 0;
         int c;
@@ -40,7 +40,7 @@ static unsigned long funcion2(unsigned char *str)
 
     //Algoritmo creado para la base de datos sdbm, 
     //fuente: http://profesores.elo.utfsm.cl/~agv/elo320/miscellaneous/hashFunction/hashFunction.html
-unsigned long funcion3(unsigned char *str)
+unsigned long funcion3(const unsigned char *str)
     {
         unsigned long hash = 5381;
         int c;
