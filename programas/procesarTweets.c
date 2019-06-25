@@ -12,13 +12,13 @@
 
 typedef struct{
 	char* clave;
-	size_t cant;
+	int cant;
 }tt_t;
 /* *****************************************************************
  *                    FUNCIONES AUXILIARES
  * *****************************************************************/
 
-tt_t* tt_crear(const char* clave, size_t cant){
+tt_t* tt_crear(char* clave, size_t cant){
 	tt_t* tt = malloc(sizeof(tt_t));
 	//COPIAR CLAVE
 	tt->clave = clave;
@@ -33,6 +33,17 @@ void tt_destruir_(tt_t* tt){
 
 void tt_destruir(void* tt){
 	tt_destruir_((tt_t*)tt);
+}
+
+int cmp_(tt_t* t1, tt_t* t2){
+	if(t1->cant > t2->cant) return -1;
+	if(t1->cant < t2->cant) return 1;
+	if(strcmp(t1->clave, t2->clave) > 0) return -1;
+	return 1;
+}
+
+int cmp(const void* t1,const void* t2){
+	return cmp_((tt_t*) t1, (tt_t*) t2);
 }
 
 bool validar_parametros(int argc,char* argv[]){
@@ -101,7 +112,7 @@ heap_t* cargar_heap(lista_t* lista, minsketch_t* min, int k){
 	return heap;
 }
 
-void imprimir_tt(heap_t heap){
+void imprimir_tt(heap_t* heap){
 	pila_t* pila = pila_crear();
 	while(!heap_esta_vacio(heap)) pila_apilar(pila, heap_desencolar(heap));
 	while(!pila_esta_vacia(pila)){
