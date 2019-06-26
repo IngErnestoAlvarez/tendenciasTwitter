@@ -27,7 +27,7 @@ size_t funcion1(const char* cp)
     return hash;
 }
 //Del tp del hash, sigo sin saber de donde es.
-static unsigned long funcion2(const unsigned char *str)
+static unsigned long funcion2(const char *str)
  	{
         unsigned long hash = 0;
         int c;
@@ -40,7 +40,7 @@ static unsigned long funcion2(const unsigned char *str)
 
     //Algoritmo creado para la base de datos sdbm, 
     //fuente: http://profesores.elo.utfsm.cl/~agv/elo320/miscellaneous/hashFunction/hashFunction.html
-unsigned long funcion3(const unsigned char *str)
+unsigned long funcion3(const char *str)
     {
         unsigned long hash = 5381;
         int c;
@@ -77,24 +77,29 @@ minsketch_t* min_crear(){
 		free(nuevo);
 		return NULL;
 	}
+	for(int i = 0; i < TAM_VEC; i++){
+		nuevo->vector1[i] = 0;
+		nuevo->vector2[i] = 0;
+		nuevo->vector3[i] = 0;
+	}
 	return nuevo;
 }
 
 void min_guardar(minsketch_t* min,const char* clave){
-	min->vector1[funcion1(clave)]++;
-	min->vector2[funcion2(clave)]++;
-	min->vector3[funcion3(clave)]++;
+	min->vector1[funcion1(clave)%TAM_VEC]++;
+	min->vector2[funcion2(clave)%TAM_VEC]++;
+	min->vector3[funcion3(clave)%TAM_VEC]++;
 }
 
 size_t min_obtener(minsketch_t* min, const char* clave){
-	size_t minimo = min->vector1[funcion1(clave)];
+	size_t minimo = min->vector1[funcion1(clave)%TAM_VEC];
 
-	if(minimo > min->vector2[funcion2(clave)]){
-		minimo = min->vector2[funcion2(clave)];
+	if(minimo > min->vector2[funcion2(clave)%TAM_VEC]){
+		minimo = min->vector2[funcion2(clave)%TAM_VEC];
 	}
 
-	if(minimo > min->vector3[funcion3(clave)]){
-		minimo = min->vector3[funcion3(clave)];
+	if(minimo > min->vector3[funcion3(clave)%TAM_VEC]){
+		minimo = min->vector3[funcion3(clave)%TAM_VEC];
 	}
 	return minimo;
 }

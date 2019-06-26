@@ -47,9 +47,9 @@ bool pila_redimensionar(pila_t* pila, size_t nuevo){
 }
 
 bool pila_apilar(pila_t *pila, void* valor){
-    /*if(pila->cantidad == pila->capacidad){
+    if(pila->cantidad == pila->capacidad){
         if(!pila_redimensionar(pila, pila->capacidad*MULTIPLICADOR)) return false;
-    }*/
+    }
     pila->datos[pila->cantidad] = valor;
     pila->cantidad++;
     return true;

@@ -9,6 +9,7 @@
 #include "../noProgramas/heap.h"
 #include "../noProgramas/hash.h"
 #include "../noProgramas/pila.h"
+#define _POSIX_C_SOURCE 200809L
 
 typedef struct{
 	char* clave;
@@ -20,9 +21,8 @@ typedef struct{
 
 tt_t* tt_crear(char* clave, size_t cant){
 	tt_t* tt = malloc(sizeof(tt_t));
-	//COPIAR CLAVE
-	tt->clave = clave;
-	tt->cant = cant;
+	tt->clave = strdup(clave);
+	tt->cant = (int)cant;
 	return tt;
 }
 
@@ -38,8 +38,8 @@ void tt_destruir(void* tt){
 int cmp_(tt_t* t1, tt_t* t2){
 	if(t1->cant > t2->cant) return -1;
 	if(t1->cant < t2->cant) return 1;
-	if(strcmp(t1->clave, t2->clave) > 0) return -1;
-	return 1;
+	if(strcmp(t1->clave, t2->clave) > 0) return 1;
+	return -1;
 }
 
 int cmp(const void* t1,const void* t2){
@@ -83,7 +83,7 @@ minsketch_t* cargar_sketch(lista_t* lista_tweets){
 heap_t* cargar_heap(lista_t* lista, minsketch_t* min, int k){
 	hash_t* hash = hash_crear(NULL);
 	heap_t* heap = heap_crear(cmp);
-	char* linea;
+	char* linea = NULL;
 	char** tweet = NULL;
 	size_t i = 1;
 	tt_t* tt = NULL;
@@ -102,6 +102,9 @@ heap_t* cargar_heap(lista_t* lista, minsketch_t* min, int k){
 					tt_destruir(heap_desencolar(heap));
 					heap_encolar(heap, tt);
 				}
+				else{
+					tt_destruir(tt);
+				}
 			}
 			i++;
 		}
@@ -118,7 +121,9 @@ void imprimir_tt(heap_t* heap){
 	while(!pila_esta_vacia(pila)){
 		tt_t* tt = pila_desapilar(pila);
 		fprintf(stdout, "%d %s\n", tt->cant, tt->clave);
+		tt_destruir(tt);
 	}
+	pila_destruir(pila);
 }
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
@@ -139,7 +144,7 @@ int main(int argc, char *argv[]){
 		lista_destruir(lista_de_tweets,free);
 		heap_destruir(heap, tt_destruir);
 		min_destruir(sketch);
-		lista_de_tweets=leer_tweets(stdin,atoi(argv[1]));
+		lista_de_tweets = leer_tweets(stdin,atoi(argv[1]));
 	}
 
 	lista_destruir(lista_de_tweets,free);
