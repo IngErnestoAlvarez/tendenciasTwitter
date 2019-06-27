@@ -11,52 +11,46 @@
 #include "../noProgramas/pila.h"
 #define _POSIX_C_SOURCE 200809L
 
+#define TAM 10000
+
 typedef struct{
 	char* clave;
 	int cant;
-}tt_t;
+}usuario_t;
 /* *****************************************************************
  *                    FUNCIONES AUXILIARES
  * *****************************************************************/
 
-tt_t* tt_crear(char* clave, size_t cant){
-	tt_t* tt = malloc(sizeof(tt_t));
+usuario_t* tt_crear(const char* clave, size_t cant){
+	usuario_t* tt = malloc(sizeof(usuario_t));
 	tt->clave = strdup(clave);
 	tt->cant = (int)cant;
 	return tt;
 }
 
-void tt_destruir_(tt_t* tt){
+void tt_destruir_(usuario_t* tt){
 	free(tt->clave);
 	free(tt);
 }
 
 void tt_destruir(void* tt){
-	tt_destruir_((tt_t*)tt);
+	tt_destruir_((usuario_t*)tt);
 }
 
-int cmp_(tt_t* t1, tt_t* t2){
+int cmp_(usuario_t* t1, usuario_t* t2){
 	if(t1->cant > t2->cant) return -1;
 	if(t1->cant < t2->cant) return 1;
-	if(strcmp(t1->clave, t2->clave) > 0) return 1;
-	return -1;
+	if(strcmp(t1->clave, t2->clave) > 0) return -1;
+	return 1;
 }
 
 int cmp(const void* t1,const void* t2){
-	return cmp_((tt_t*) t1, (tt_t*) t2);
+	return cmp_((usuario_t*) t1, (usuario_t*) t2);
 }
 
-bool validar_parametros(int argc,char* argv[]){
-	if(argc != 3){
+bool validar_parametro(int argc,char* argv[]){
+	if(argc != 2){
 		fprintf(stderr, "Error: La cantidad de parametros no es valida.");
-		return false;
-	}
-	if(atoi(argv[1]) <= 0){
-		fprintf(stderr, "Error: El numero de lineas a leer no es valido.");
-		return false;
-	}
-	if(atoi(argv[2]) <= 0){
-		fprintf(stderr, "Error: El numero de tendencias que pides no es valido");
 		return false;
 	}
 	return true;
@@ -91,20 +85,71 @@ hash_t* cargar_hash(lista_t* lista_tweets){
 	return hash_usuarios_tts;
 }
 
+void counting_sort(lista_t* vector[], lista_t* final, int n){
+	heap_t* heap = heap_crear(cmp);
+	for(int i = 0; i < TAM; i++){
+		if(!lista_esta_vacia(vector[i])){
+			if(lista_largo(vector[i]) == 1) lista_insertar_ultimo(final, lista_borrar_primero(vector[i]));
+			while(!lista_esta_vacia(vector[i])){
+				heap_encolar(heap, lista_borrar_primero(vector[i]));
+			}
+			while(!heap_esta_vacio(heap)){
+				lista_insertar_ultimo(final, heap_desencolar(heap));
+			}
+		}
+	}
+	heap_destruir(heap, tt_destruir);
+}
+
+lista_t* ordenamiento(hash_t* hash){
+	hash_iter_t* iter = hash_iter_crear(hash);
+	lista_t* vector[TAM];
+	for(int i = 0; i<TAM; i++) vector[i] = lista_crear();
+	while(!hash_iter_al_final(iter)){
+		usuario_t* tt = tt_crear(hash_iter_ver_actual(iter), *(size_t*)hash_obtener(hash, hash_iter_ver_actual(iter)));
+		lista_insertar_ultimo(vector[tt->cant], tt);
+		hash_iter_avanzar(iter);
+	}
+	lista_t* final = lista_crear();
+	counting_sort(vector, final, TAM);
+	for(int j = 0; j < TAM; j++) lista_destruir(vector[j], NULL);
+	hash_iter_destruir(iter);
+	return final;
+}
+
+void imprimir(lista_t* lista){
+	usuario_t* usuario = lista_borrar_primero(lista);
+	size_t indice = usuario->cant;
+	fprintf(stdout, "%ld:", indice);
+	fprintf(stdout, " %s", usuario->clave);
+	while(!lista_esta_vacia(lista)){
+		usuario = lista_borrar_primero(lista);
+		if(usuario->cant != indice){
+			indice = usuario->cant;
+			fprintf(stdout, "\n%ld:", indice);
+			fprintf(stdout, " %s", usuario->clave);
+		}
+		else{
+			fprintf(stdout, ", %s", usuario->clave);
+		}
+	}
+}
 /* *****************************************************************
  *                      FUNCION PRINCIPAL
  * *****************************************************************/
 
 int main(int argc, char *argv[]){
-	if(!validar_parametros(argc, argv)) return -1;	
-	lista_t* lista_de_tweets = leer_tweets(stdin, atoi(argv[1])); 
+	if(!validar_parametro(argc, argv)) return -1;	
+	FILE* archivo = fopen(argv[1], "r");
+	if(!archivo) return -1;
+	lista_t* lista_de_tweets = leer_tweets(archivo, atoi(argv[1])); 
 	while(!lista_esta_vacia(lista_de_tweets)){
 		hash_t* hash_usuarios = cargar_hash(lista_de_tweets);
 		lista_t* lista_ordenada = ordenamiento(hash_usuarios); // de tts?
 		imprimir(lista_ordenada);
 		lista_destruir(lista_de_tweets, free);
-		hash_destruir(hash_destruir);
-		lista_de_tweets = leer_tweets(stdin, atoi(argv[1]));
+		hash_destruir(hash_usuarios);
+		lista_de_tweets = leer_tweets(archivo, atoi(argv[1]));
 	}
 	lista_destruir(lista_de_tweets,free);
 	return 0;
